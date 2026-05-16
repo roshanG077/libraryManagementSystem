@@ -33,24 +33,12 @@
         <servlet-class>com.finlogic.servlet.IssuedBookservlet</servlet-class>
     </servlet>
     <servlet>
-        <servlet-name>ViewBookByIdServlet</servlet-name>
-        <servlet-class>com.finlogic.servlet.ViewBookByIdServlet</servlet-class>
-    </servlet>
-    <servlet>
-        <servlet-name>ViewMemberByIdServlet</servlet-name>
-        <servlet-class>com.finlogic.servlet.ViewMemberByIdServlet</servlet-class>
-    </servlet>
-    <servlet>
         <servlet-name>EditMemberServlet</servlet-name>
         <servlet-class>com.finlogic.servlet.EditMemberServlet</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>UpdateMemberServlet</servlet-name>
         <servlet-class>com.finlogic.servlet.UpdateMemberServlet</servlet-class>
-    </servlet>
-    <servlet>
-        <servlet-name>IssuedBookInfoServlet</servlet-name>
-        <servlet-class>com.finlogic.servlet.IssuedBookInfoServlet</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>ReturnBookServlet</servlet-name>
@@ -63,6 +51,30 @@
     <servlet>
         <servlet-name>DashboardDataServlet</servlet-name>
         <servlet-class>com.finlogic.servlet.DashboardDataServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>LoginServlet</servlet-name>
+        <servlet-class>com.finlogic.servlet.LoginServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>RegisterServlet</servlet-name>
+        <servlet-class>com.finlogic.servlet.RegisterServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>LogoutServlet</servlet-name>
+        <servlet-class>com.finlogic.servlet.LogoutServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ViewBookByIdServlet</servlet-name>
+        <servlet-class>com.finlogic.servlet.ViewBookByIdServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ViewMemberByIdServlet</servlet-name>
+        <servlet-class>com.finlogic.servlet.ViewMemberByIdServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>IssuedBookInfoServlet</servlet-name>
+        <servlet-class>com.finlogic.servlet.IssuedBookInfoServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>AddBookServlet</servlet-name>
@@ -90,19 +102,11 @@
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>IssueBookServlet</servlet-name>
-        <url-pattern>/Issuebook</url-pattern>
+        <url-pattern>/IssueBook</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>IssuedBookservlet</servlet-name>
         <url-pattern>/IssuedBook</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>ViewBookByIdServlet</servlet-name>
-        <url-pattern>/viewbookbyid</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>ViewMemberByIdServlet</servlet-name>
-        <url-pattern>/viewmemberbyid</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>EditMemberServlet</servlet-name>
@@ -111,10 +115,6 @@
     <servlet-mapping>
         <servlet-name>UpdateMemberServlet</servlet-name>
         <url-pattern>/updatemember</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>IssuedBookInfoServlet</servlet-name>
-        <url-pattern>/IssuedBookInfoServlet</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>ReturnBookServlet</servlet-name>
@@ -128,4 +128,59 @@
         <servlet-name>DashboardDataServlet</servlet-name>
         <url-pattern>/DashboardDataServlet</url-pattern>
     </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>LoginServlet</servlet-name>
+        <url-pattern>/LoginServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>RegisterServlet</servlet-name>
+        <url-pattern>/RegisterServlet</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>DeleteBookServlet</servlet-name>
+        <servlet-class>com.finlogic.servlet.DeleteBookServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>LogoutServlet</servlet-name>
+        <url-pattern>/LogoutServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>DeleteBookServlet</servlet-name>
+        <url-pattern>/DeleteBook</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ViewBookByIdServlet</servlet-name>
+        <url-pattern>/viewbookbyid</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ViewMemberByIdServlet</servlet-name>
+        <url-pattern>/viewmemberbyid</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>IssuedBookInfoServlet</servlet-name>
+        <url-pattern>/IssuedBookInfoServlet</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>SettingsServlet</servlet-name>
+        <servlet-class>com.finlogic.servlet.SettingsServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>SettingsServlet</servlet-name>
+        <url-pattern>/settings</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>UserIssueBookFormServlet</servlet-name>
+        <servlet-class>com.finlogic.servlet.UserIssueBookFormServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>UserIssueBookFormServlet</servlet-name>
+        <url-pattern>/user_issuebook.html</url-pattern>
+    </servlet-mapping>
+
+    <welcome-file-list>
+        <welcome-file>home.html</welcome-file>
+    </welcome-file-list>
 </web-app>

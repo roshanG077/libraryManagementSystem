@@ -31,7 +31,7 @@ public class ConfirmReturnServlet extends HttpServlet {
         // Validate
         if (issueIdParam == null || penaltyParam == null || penaltyPaidParam == null ||
             bookIdParam == null  || memberIdParam == null) {
-            out.println("<script>alert('Invalid submission data.'); window.location='ReturnBookServlet';</script>");
+            response.sendRedirect("ReturnBookServlet?error=invalid");
             return;
         }
 
@@ -43,20 +43,26 @@ public class ConfirmReturnServlet extends HttpServlet {
             issueId     = Integer.parseInt(issueIdParam.trim());
             penalty     = Double.parseDouble(penaltyParam.trim());
             penaltyPaid = Boolean.parseBoolean(penaltyPaidParam.trim());
-            bookId      = Integer.parseInt(bookIdParam.trim());
+            
+            String cleanBid = bookIdParam.trim();
+            if (cleanBid.toUpperCase().startsWith("BK")) {
+                cleanBid = cleanBid.substring(2);
+            }
+            bookId = Integer.parseInt(cleanBid);
+            
             memberId    = Integer.parseInt(memberIdParam.trim());
         } catch (NumberFormatException e) {
-            out.println("<script>alert('Invalid input values.'); window.location='ReturnBookServlet';</script>");
+            response.sendRedirect("ReturnBookServlet?error=invalid");
             return;
         }
 
         IssueBook ib = IssueBookDAO.getIssueBookById(issueId);
         if (ib == null) {
-            out.println("<script>alert('Issue record not found.'); window.location='IssuedBook';</script>");
+            response.sendRedirect("issued_books.html?error=failed");
             return;
         }
         if (ib.isReturned()) {
-            out.println("<script>alert('This book has already been returned!'); window.location='IssuedBook';</script>");
+            response.sendRedirect("issued_books.html?error=failed");
             return;
         }
 
@@ -78,31 +84,64 @@ public class ConfirmReturnServlet extends HttpServlet {
             // Success page
             out.println("<!DOCTYPE html><html lang='en'><head>");
             out.println("<meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'>");
-            out.println("<title>Return Successful - Library Management System</title>");
+            out.println("<title>Return Successful - LibraryOS</title>");
             out.println("<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css'>");
             out.println("<link rel='stylesheet' href='css/style.css'>");
-            out.println("<style>");
-            out.println(".success-page{display:flex;justify-content:center;align-items:center;min-height:100vh;background:var(--bg);}");
-            out.println(".success-card{background:var(--card-bg);border:1px solid var(--border);border-radius:16px;padding:50px 44px;max-width:480px;width:100%;text-align:center;box-shadow:var(--shadow-lg);}");
-            out.println(".success-icon{font-size:72px;color:#10b981;margin-bottom:22px;}");
-            out.println(".success-card h2{font-size:26px;color:var(--text);margin-bottom:10px;}");
-            out.println(".success-card p{color:var(--text-muted);font-size:15px;margin:5px 0;}");
-            out.println(".success-actions{display:flex;gap:12px;margin-top:30px;justify-content:center;}");
-            out.println("</style>");
             out.println("</head><body>");
-            out.println("<div class='success-page'><div class='success-card'>");
-            out.println("<div class='success-icon'><i class='fas fa-check-circle'></i></div>");
-            out.println("<h2>Book Returned Successfully!</h2>");
-            out.println("<p>Issue #" + issueId + " has been processed.</p>");
-            out.println("<p>Penalty: <strong>₹" + String.format("%.2f", penalty) + "</strong></p>");
-            out.println("<p>Penalty Paid: <strong>" + (penaltyPaid ? "Yes ✅" : "No — recorded as unpaid") + "</strong></p>");
-            out.println("<div class='success-actions'>");
-            out.println("<a href='IssuedBook' class='btn-cancel'><i class='fas fa-list'></i> All Issues</a>");
-            out.println("<a href='ReturnBookServlet' class='btn-submit'><i class='fas fa-undo'></i> Return Another</a>");
+
+            out.println("<div class='blob-container'><div class='blob blob-1'></div><div class='blob blob-3'></div></div>");
+
+            printNavbar(out, "return", request);
+
+            out.println("<div class='container flex-center min-h-screen-nav'>");
+            out.println("<div class='lib-card max-w-480 text-center' style='padding: 3rem 2rem;'>");
+            out.println("<div class='stat-orb m-auto orb-green-gradient fs-2rem'><i class='fas fa-check-circle'></i></div>");
+            out.println("<h2 class='text-section'>Return Successful!</h2>");
+            out.println("<p class='text-muted mb-2'>Issue #" + issueId + " has been processed.</p>");
+            
+            out.println("<div class='lib-table-container mb-2'>");
+            out.println("<table class='lib-table w-full text-left'>");
+            out.println("<tr><th>Penalty</th><td class='font-black fs-1-1rem'>₹" + String.format("%.2f", penalty) + "</td></tr>");
+            String badgeClass = penaltyPaid ? "badge-success" : "badge-danger";
+            out.println("<tr><th>Paid Status</th><td><span class='badge " + badgeClass + "'>" + (penaltyPaid ? "Paid ✅" : "Unpaid ❌") + "</span></td></tr>");
+            out.println("</table></div>");
+
+            out.println("<div class='flex gap-1 justify-center'>");
+            out.println("<a href='issued_books.html' class='lib-btn lib-btn-secondary flex-1'>All Issues</a>");
+            out.println("<a href='ReturnBookServlet' class='lib-btn lib-btn-primary flex-1'>Return Another</a>");
             out.println("</div></div></div>");
             out.println("<script src='script.js'></script></body></html>");
         } else {
-            out.println("<script>alert('Failed to process return. Please try again.'); window.location='ReturnBookServlet';</script>");
+            response.sendRedirect("ReturnBookServlet?error=failed");
         }
+    }
+
+    private void printNavbar(PrintWriter out, String active, HttpServletRequest request) {
+        jakarta.servlet.http.HttpSession session = request.getSession(false);
+        boolean isUser = (session != null && "user".equals(session.getAttribute("role")));
+
+        out.println("<nav class='top-navbar'>");
+        out.println("<div class='nav-container container'>");
+        out.println("<a href='" + (isUser ? "user_dashboard.html" : "index.html") + "' class='nav-logo'><i class='fas fa-layer-group'></i> LibraryOS</a>");
+        out.println("<div class='nav-links'>");
+        
+        if (isUser) {
+            out.println(navItem("user_dashboard.html", "fa-home", "Home", "dashboard".equals(active)));
+            out.println(navItem("user_issuebook.html", "fa-book-open", "Issue Book", "issue".equals(active)));
+            out.println(navItem("ReturnBookServlet", "fa-undo", "Return Book", "return".equals(active)));
+        } else {
+            out.println(navItem("index.html",         "fa-home",         "Dashboard",   "dashboard".equals(active)));
+            out.println(navItem("addform.html",        "fa-book",         "Books",       "books".equals(active)));
+            out.println(navItem("addmember.html",      "fa-users",        "Members",     "members".equals(active)));
+            out.println(navItem("issued_books.html",          "fa-exchange-alt", "Issued Books", "issue".equals(active) || "return".equals(active)));
+        }
+        
+        out.println("<a href='LogoutServlet' class='lib-btn lib-btn-secondary h-40 px-4 fs-md' style='border-radius: 12px; margin-left: 1rem;'><i class='fas fa-sign-out-alt'></i> Logout</a>");
+        out.println("</div></div></nav>");
+    }
+
+    private String navItem(String href, String icon, String label, boolean active) {
+        return "<a href='" + href + "' class='nav-link" + (active ? " active" : "") +
+               "'><i class='fas " + icon + "'></i> " + label + "</a>";
     }
 }

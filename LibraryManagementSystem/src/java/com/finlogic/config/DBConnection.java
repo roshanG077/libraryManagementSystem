@@ -18,7 +18,6 @@ private static final String PASSWORD = "RoshanGupta@09";
             Class.forName("com.mysql.cj.jdbc.Driver");
         } catch (ClassNotFoundException e) {
             System.err.println("[DBConnection] MySQL JDBC driver not found!");
-            e.printStackTrace();
         }
     }
 

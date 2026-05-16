@@ -42,8 +42,7 @@ public class AddBookServlet extends HttpServlet {
         int result = BookDAO.insertBook(book);
 
         if (result > 0) {
-            System.out.println("[AddBookServlet] Book added: " + title);
-            response.sendRedirect("view?success=added");
+            response.sendRedirect("books.html?success=added");
         } else {
             response.sendRedirect("addform.html?error=db_error");
         }

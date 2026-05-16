@@ -46,6 +46,21 @@ public class BookDAO {
         return 0;
     }
 
+    // ── DELETE ────────────────────────────────────────────────────────────────
+    public static int deleteBook(int id) {
+        String sql = "DELETE FROM books WHERE id=?";
+        try (Connection c = DBConnection.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            
+            ps.setInt(1, id);
+            return ps.executeUpdate();
+            
+        } catch (SQLException e) {
+            System.err.println("[BookDAO.deleteBook] " + e.getMessage());
+        }
+        return 0;
+    }
+
     // ── GET BY ID ─────────────────────────────────────────────────────────────
     public static Book getBookById(int id) {
         String sql = "SELECT * FROM books WHERE id=?";

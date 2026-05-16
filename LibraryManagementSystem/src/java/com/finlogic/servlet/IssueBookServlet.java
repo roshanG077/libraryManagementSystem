@@ -29,35 +29,46 @@ public class IssueBookServlet extends HttpServlet {
         // Validate presence
         if (bidParam == null || midParam == null || issueParam == null || returnParam == null ||
             bidParam.isBlank() || midParam.isBlank() || issueParam.isBlank() || returnParam.isBlank()) {
-            sendError(response, "All fields are required.", "issuebook.html");
+            sendError(response, "All fields are required.", "user_issuebook.html");
             return;
         }
 
         int bookId, memberId;
         Date issueDate, returnDate;
         try {
-            bookId   = Integer.parseInt(bidParam.trim());
-            memberId = Integer.parseInt(midParam.trim());
+            String cleanBid = bidParam.trim();
+            if (cleanBid.toUpperCase().startsWith("BK")) {
+                cleanBid = cleanBid.substring(2);
+            }
+            bookId = Integer.parseInt(cleanBid);
+            
+            jakarta.servlet.http.HttpSession session = request.getSession(false);
+            if (session != null && "user".equals(session.getAttribute("role"))) {
+                memberId = (Integer) session.getAttribute("memberId");
+            } else {
+                memberId = Integer.parseInt(midParam.trim());
+            }
+
             issueDate  = Date.valueOf(issueParam.trim());
             returnDate = Date.valueOf(returnParam.trim());
         } catch (Exception e) {
-            sendError(response, "Invalid input values.", "issuebook.html");
+            sendError(response, "Invalid input values.", "user_issuebook.html");
             return;
         }
 
         if (!returnDate.after(issueDate)) {
-            sendError(response, "Return date must be after the issue date.", "issuebook.html");
+            sendError(response, "Return date must be after the issue date.", "user_issuebook.html");
             return;
         }
 
         // Check book exists and has stock
         Book book = BookDAO.getBookById(bookId);
         if (book == null) {
-            sendError(response, "Book ID " + bookId + " not found.", "issuebook.html");
+            sendError(response, "Book ID " + bookId + " not found.", "user_issuebook.html");
             return;
         }
         if (book.getQuantity() < 1) {
-            sendError(response, "Book &quot;" + book.getTitle() + "&quot; is out of stock.", "issuebook.html");
+            sendError(response, "Book &quot;" + book.getTitle() + "&quot; is out of stock.", "user_issuebook.html");
             return;
         }
 
@@ -78,14 +89,13 @@ public class IssueBookServlet extends HttpServlet {
             // Decrement book stock
             book.setQuantity(book.getQuantity() - 1);
             BookDAO.updateBook(book);
-            response.sendRedirect("IssuedBook?success=issued");
+            response.sendRedirect("issued_books.html?msg=issued");
         } else {
-            sendError(response, "Failed to issue book. Please try again.", "issuebook.html");
+            response.sendRedirect("user_issuebook.html?error=failed");
         }
     }
 
     private void sendError(HttpServletResponse response, String message, String backUrl) throws IOException {
-        PrintWriter out = response.getWriter();
-        out.println("<script>alert('" + message.replace("'", "\\'") + "'); window.location='" + backUrl + "';</script>");
+        response.sendRedirect(backUrl + "?error=invalid");
     }
 }

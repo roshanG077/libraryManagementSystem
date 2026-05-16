@@ -2,6 +2,17 @@
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group/>
+        <group>
+            <file>file:/C:/Users/offic/Desktop/LibraryManagementSystem/LibraryManagementSystem/web/css/style.css</file>
+            <file>file:/C:/Users/offic/Desktop/LibraryManagementSystem/LibraryManagementSystem/web/register.html</file>
+            <file>file:/C:/Users/offic/Desktop/LibraryManagementSystem/LibraryManagementSystem/web/index.html</file>
+            <file>file:/C:/Users/offic/Desktop/LibraryManagementSystem/LibraryManagementSystem/web/home.html</file>
+            <file>file:/C:/Users/offic/Desktop/LibraryManagementSystem/LibraryManagementSystem/src/java/com/finlogic/servlet/UpdateMemberServlet.java</file>
+            <file>file:/C:/Users/offic/Desktop/LibraryManagementSystem/LibraryManagementSystem/src/java/com/finlogic/config/DBConnection.java</file>
+            <file>file:/C:/Users/offic/Desktop/LibraryManagementSystem/LibraryManagementSystem/web/issuebook.html</file>
+            <file>file:/C:/Users/offic/Desktop/LibraryManagementSystem/LibraryManagementSystem/src/java/com/finlogic/model/IssueBook.java</file>
+            <file>file:/C:/Users/offic/Desktop/LibraryManagementSystem/LibraryManagementSystem/src/java/com/finlogic/servlet/IssueBookServlet.java</file>
+            <file>file:/C:/Users/offic/Desktop/LibraryManagementSystem/LibraryManagementSystem/src/java/com/finlogic/servlet/IssuedBookInfoServlet.java</file>
+        </group>
     </open-files>
 </project-private>

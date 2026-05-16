@@ -9,15 +9,33 @@ import java.util.List;
 
 public class MemberDAO {
 
+    // ── AUTHENTICATE ──────────────────────────────────────────────────────────
+    public static Member authenticate(String email, String password) {
+        String sql = "SELECT * FROM members WHERE email=? AND password=?";
+        try (Connection c = DBConnection.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, email);
+            ps.setString(2, password);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return mapMember(rs);
+            }
+        } catch (SQLException e) {
+            System.err.println("[MemberDAO.authenticate] " + e.getMessage());
+        }
+        return null;
+    }
+
     // ── INSERT ────────────────────────────────────────────────────────────────
     public static int addMember(Member member) {
-        String sql = "INSERT INTO members (name, email, phone) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO members (name, email, phone, password, role) VALUES (?, ?, ?, ?, ?)";
         try (Connection c = DBConnection.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
 
             ps.setString(1, member.getName());
             ps.setString(2, member.getEmail());
             ps.setLong(3, member.getPhone());
+            ps.setString(4, member.getPassword() != null ? member.getPassword() : "123456");
+            ps.setString(5, member.getRole() != null ? member.getRole() : "user");
             return ps.executeUpdate();
 
         } catch (SQLException e) {
@@ -33,14 +51,16 @@ public class MemberDAO {
 
     // ── UPDATE ────────────────────────────────────────────────────────────────
     public static int updateMember(Member member) {
-        String sql = "UPDATE members SET name=?, email=?, phone=? WHERE id=?";
+        String sql = "UPDATE members SET name=?, email=?, phone=?, password=?, role=? WHERE id=?";
         try (Connection c = DBConnection.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
 
             ps.setString(1, member.getName());
             ps.setString(2, member.getEmail());
             ps.setLong(3, member.getPhone());
-            ps.setInt(4, member.getId());
+            ps.setString(4, member.getPassword());
+            ps.setString(5, member.getRole());
+            ps.setInt(6, member.getId());
             return ps.executeUpdate();
 
         } catch (SQLException e) {
@@ -112,11 +132,18 @@ public class MemberDAO {
 
     // ── PRIVATE HELPER ────────────────────────────────────────────────────────
     private static Member mapMember(ResultSet rs) throws SQLException {
+        String password = null;
+        String role = "user";
+        try { password = rs.getString("password"); } catch (SQLException e) {}
+        try { role = rs.getString("role"); } catch (SQLException e) {}
+        
         return new Member(
             rs.getInt("id"),
             rs.getString("name"),
             rs.getString("email"),
-            rs.getLong("phone")
+            rs.getLong("phone"),
+            password,
+            role
         );
     }
 }

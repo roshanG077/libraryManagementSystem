@@ -39,8 +39,7 @@ public class AddMemberServlet extends HttpServlet {
         int result = MemberDAO.addMember(member);
 
         if (result > 0) {
-            System.out.println("[AddMemberServlet] Member added: " + name);
-            response.sendRedirect("viewmember?success=added");
+            response.sendRedirect("members.html?success=added");
         } else {
             response.sendRedirect("addmember.html?error=db_error");
         }

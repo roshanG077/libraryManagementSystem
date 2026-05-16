@@ -22,7 +22,7 @@ public class ReturnBookServlet extends HttpServlet {
         if (idParam != null && !idParam.isBlank()) {
             showConfirmPage(request, response, idParam.trim());
         } else {
-            showFindForm(response);
+            showFindForm(request, response);
         }
     }
 
@@ -32,21 +32,38 @@ public class ReturnBookServlet extends HttpServlet {
             throws ServletException, IOException {
 
         String bookIdParam   = request.getParameter("bookId");
-        String memberIdParam = request.getParameter("memberId");
+        String memberIdParam = request.getParameter("memberId"); // Might be null or empty
 
-        if (bookIdParam == null || memberIdParam == null ||
-            bookIdParam.isBlank() || memberIdParam.isBlank()) {
+        if (bookIdParam == null || bookIdParam.isBlank()) {
             response.sendRedirect("ReturnBookServlet?error=missing_fields");
             return;
         }
 
         try {
-            int bookId   = Integer.parseInt(bookIdParam.trim());
-            int memberId = Integer.parseInt(memberIdParam.trim());
+            String cleanBid = bookIdParam.trim();
+            if (cleanBid.toUpperCase().startsWith("BK")) {
+                cleanBid = cleanBid.substring(2);
+            }
+            int bookId = Integer.parseInt(cleanBid);
+            IssueBook ib = null;
 
-            IssueBook ib = IssueBookDAO.getIssuedBook(bookId, memberId);
+            jakarta.servlet.http.HttpSession session = request.getSession(false);
+            if (session != null && "user".equals(session.getAttribute("role"))) {
+                // User returning their own book
+                int memberId = (Integer) session.getAttribute("memberId");
+                ib = IssueBookDAO.getIssuedBook(bookId, memberId);
+            } else {
+                // Admin returning a book - memberId is optional
+                if (memberIdParam != null && !memberIdParam.isBlank()) {
+                    int memberId = Integer.parseInt(memberIdParam.trim());
+                    ib = IssueBookDAO.getIssuedBook(bookId, memberId);
+                } else {
+                    ib = IssueBookDAO.getIssuedBookByBookId(bookId);
+                }
+            }
+
             if (ib == null) {
-                sendErrorJs(response, "No active issue record found for Book ID " + bookId + " and Member ID " + memberId + ".", "ReturnBookServlet");
+                sendErrorJs(response, "No active issue record found for Book ID " + bookId + ".", "ReturnBookServlet");
                 return;
             }
             // Redirect to confirm page with the issue id
@@ -58,38 +75,67 @@ public class ReturnBookServlet extends HttpServlet {
     }
 
     // ── FIND FORM ─────────────────────────────────────────────────────────────
-    private void showFindForm(HttpServletResponse response) throws IOException {
+    private void showFindForm(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("text/html;charset=UTF-8");
         PrintWriter out = response.getWriter();
 
         out.println("<!DOCTYPE html><html lang='en'><head>");
         out.println("<meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'>");
-        out.println("<title>Return Book - Library Management System</title>");
+        out.println("<title>Return Book - LibraryOS</title>");
         out.println("<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css'>");
         out.println("<link rel='stylesheet' href='css/style.css'>");
         out.println("</head><body>");
-        printSidebar(out, "return");
+        
+        out.println("<div class='blob-container'>");
+        out.println("<div class='blob blob-1'></div>");
+        out.println("<div class='blob blob-3'></div>");
+        out.println("</div>");
+        
+        printNavbar(out, "return", request);
 
-        out.println("<div class='main-content'>");
-        out.println("<header class='top-header'>");
-        out.println("<div class='welcome'><h1>Return Book</h1><p>Find the issued book record to process a return</p></div>");
-        out.println("<div class='user-profile'>");
-        out.println("<button id='theme-toggle' class='theme-toggle'><i class='fas fa-moon'></i> Dark Mode</button>");
-        out.println("<div class='user-avatar'>L</div><span class='user-name'>Admin</span>");
-        out.println("</div></header>");
+        out.println("<div class='container max-w-800 mt-4 mb-4'>");
+        out.println("<div class='lib-card'>");
+        out.println("<div class='text-center mb-2'>");
+        out.println("<div class='stat-orb m-auto' style='background: linear-gradient(to bottom right, #34D399, #10B981);'>");
+        out.println("<i class='fas fa-undo'></i>");
+        out.println("</div>");
+        out.println("<h1 class='text-section'>Return Book</h1>");
+        out.println("<p class='text-muted'>Find the issued book record to process a return</p>");
+        out.println("</div>");
 
-        out.println("<div style='max-width:520px;margin:0 auto;'><div class='dashboard-card'>");
-        out.println("<div class='card-header'><h3><i class='fas fa-search'></i> Find Issued Book</h3></div>");
+        jakarta.servlet.http.HttpSession session = request.getSession(false);
+        boolean isUser = (session != null && "user".equals(session.getAttribute("role")));
+        String userName = isUser ? (String) session.getAttribute("memberName") : "";
+        String userId = isUser ? String.valueOf(session.getAttribute("memberId")) : "";
+
         out.println("<form action='ReturnBookServlet' method='post'>");
-        out.println("<div class='form-group'><label for='bookId'><i class='fas fa-book'></i> Book ID</label>");
-        out.println("<input type='number' id='bookId' name='bookId' placeholder='Enter Book ID' min='1' required></div>");
-        out.println("<div class='form-group'><label for='memberId'><i class='fas fa-user'></i> Member ID</label>");
-        out.println("<input type='number' id='memberId' name='memberId' placeholder='Enter Member ID' min='1' required></div>");
-        out.println("<div class='form-actions'>");
-        out.println("<button type='submit' class='btn-submit'><i class='fas fa-search'></i> Find Record</button>");
-        out.println("<a href='IssuedBook' class='btn-cancel'><i class='fas fa-list'></i> All Issued Books</a>");
-        out.println("</div></form></div></div>");
-        out.println("</div>"); // main-content
+        
+        out.println("<div class='form-group'><label for='userName'>User Name</label>");
+        out.println("<input type='text' class='lib-input bg-muted cursor-not-allowed' id='userName' name='userName' value='" + userName + "' " + (isUser ? "readonly" : "required") + "></div>");
+
+        out.println("<div class='form-group'><label for='memberId'>User ID</label>");
+        out.println("<input type='number' class='lib-input bg-muted cursor-not-allowed' id='memberId' name='memberId' min='1' value='" + userId + "' " + (isUser ? "readonly" : "required") + "></div>");
+
+        out.println("<div class='form-group'><label for='bookTitle'>Book Title</label>");
+        out.println("<input type='text' class='lib-input' id='bookTitle' name='bookTitle' required></div>");
+
+        out.println("<div class='form-group'><label for='bookId'>Book ID</label>");
+        out.println("<input type='text' class='lib-input' id='bookId' name='bookId' required></div>");
+
+        out.println("<div class='form-group'><label for='issueDate'>Issue Date</label>");
+        out.println("<input type='date' class='lib-input' id='issueDate' name='issueDate' required></div>");
+
+        out.println("<div class='form-group'><label for='dueDate'>Due Date</label>");
+        out.println("<input type='date' class='lib-input' id='dueDate' name='dueDate' required></div>");
+
+        out.println("<div class='form-group'><label for='fine'>Fine (₹)</label>");
+        out.println("<input type='text' class='lib-input bg-muted cursor-not-allowed' id='fine' name='fine' value='0.0' readonly></div>");
+        
+        out.println("<div class='flex gap-1 mt-2'>");
+        out.println("<button type='submit' class='lib-btn lib-btn-primary flex-1'>Find Record</button>");
+        out.println("<a href='" + (isUser ? "user_dashboard.html" : "index.html") + "' class='lib-btn lib-btn-secondary flex-1'>Cancel</a>");
+        out.println("</div></form>");
+        out.println("</div></div>");
         out.println("<script src='script.js'></script></body></html>");
     }
 
@@ -102,104 +148,137 @@ public class ReturnBookServlet extends HttpServlet {
 
         int issueId;
         try { issueId = Integer.parseInt(idParam); }
-        catch (NumberFormatException e) { response.sendRedirect("IssuedBook"); return; }
+        catch (NumberFormatException e) { response.sendRedirect("issued_books.html"); return; }
 
         IssueBook ib = IssueBookDAO.getIssueBookById(issueId);
         if (ib == null) {
-            sendErrorJs(response, "Issue record #" + issueId + " not found.", "IssuedBook");
+            sendErrorJs(response, "Issue record #" + issueId + " not found.", "issued_books.html");
             return;
         }
         if (ib.isReturned()) {
-            sendErrorJs(response, "This book has already been returned!", "IssuedBook");
+            sendErrorJs(response, "This book has already been returned!", "issued_books.html");
             return;
         }
 
         Date   today      = new Date(System.currentTimeMillis());
         double penalty    = IssueBookDAO.calculatePenalty(ib, today);
         int    daysOverdue = IssueBookDAO.calculateDaysOverdue(ib, today);
+        
+        jakarta.servlet.http.HttpSession session = request.getSession(false);
+        boolean isUser = (session != null && "user".equals(session.getAttribute("role")));
 
         out.println("<!DOCTYPE html><html lang='en'><head>");
         out.println("<meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'>");
-        out.println("<title>Confirm Return - Library Management System</title>");
+        out.println("<title>Confirm Return - LibraryOS</title>");
         out.println("<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css'>");
         out.println("<link rel='stylesheet' href='css/style.css'>");
         out.println("</head><body>");
-        printSidebar(out, "return");
 
-        out.println("<div class='main-content'>");
-        out.println("<header class='top-header'>");
-        out.println("<div class='welcome'><h1>Confirm Return</h1><p>Review details before processing the return</p></div>");
-        out.println("<div class='user-profile'>");
-        out.println("<button id='theme-toggle' class='theme-toggle'><i class='fas fa-moon'></i> Dark Mode</button>");
-        out.println("<div class='user-avatar'>L</div><span class='user-name'>Admin</span>");
-        out.println("</div></header>");
+        out.println("<div class='blob-container'>");
+        out.println("<div class='blob blob-2'></div>");
+        out.println("<div class='blob blob-3'></div>");
+        out.println("</div>");
+
+        printNavbar(out, "return", request);
+
+        out.println("<div class='container max-w-800 mt-4 mb-4'>");
+        out.println("<div class='lib-card'>");
+        out.println("<div class='text-center mb-2'>");
+        out.println("<div class='stat-orb m-auto orb-danger-gradient'>");
+        out.println("<i class='fas fa-exclamation-circle'></i>");
+        out.println("</div>");
+        out.println("<h1 class='text-section'>Confirm Return</h1>");
+        out.println("<p class='text-muted'>Review details before processing the return</p>");
+        out.println("</div>");
+
+        // Fetch Book and Member details
+        com.finlogic.model.Book book = com.finlogic.dao.BookDAO.getBookById(ib.getBookId());
+        com.finlogic.model.Member member = com.finlogic.dao.MemberDAO.getMemberById(ib.getMemberId());
 
         // Issue summary
-        out.println("<div class='info-card'>");
-        out.println("<div class='card-header'><h3><i class='fas fa-info-circle'></i> Return Summary</h3></div>");
-        out.println("<table class='info-table'>");
+        out.println("<div class='lib-table-container mb-2'>");
+        out.println("<table class='lib-table w-full'>");
         out.println("<tr><th>Issue ID</th><td>#" + ib.getId() + "</td></tr>");
+        out.println("<tr><th>User ID</th><td>" + ib.getMemberId() + "</td></tr>");
+        out.println("<tr><th>User Name</th><td>" + (member != null ? member.getName() : "Unknown") + "</td></tr>");
         out.println("<tr><th>Book ID</th><td>" + ib.getBookId() + "</td></tr>");
-        out.println("<tr><th>Member ID</th><td>" + ib.getMemberId() + "</td></tr>");
+        out.println("<tr><th>Book Title</th><td>" + (book != null ? book.getTitle() : "Unknown") + "</td></tr>");
         out.println("<tr><th>Issue Date</th><td>" + ib.getIssueDate() + "</td></tr>");
         out.println("<tr><th>Due Date</th><td>" + ib.getReturnDate() + "</td></tr>");
         out.println("<tr><th>Return Date (Today)</th><td>" + today + "</td></tr>");
         out.println("<tr><th>Days Overdue</th><td>" +
-                    (daysOverdue > 0 ? "<span class='badge-danger'>" + daysOverdue + " days</span>" : "<span class='badge-success'>On time</span>") +
+                    (daysOverdue > 0 ? "<span class='badge badge-danger'>" + daysOverdue + " days</span>" : "<span class='badge badge-success'>On time</span>") +
                     "</td></tr>");
-        out.println("<tr><th>Penalty</th><td><strong>₹" + String.format("%.2f", penalty) + "</strong></td></tr>");
+        out.println("<tr><th>Fine / Penalty</th><td class='font-black fs-1-1rem' style='color: var(--accent-secondary);'>₹" + String.format("%.2f", penalty) + "</td></tr>");
         out.println("</table></div>");
 
         // Confirm form
-        out.println("<div class='dashboard-card'>");
         out.println("<form action='ConfirmReturnServlet' method='post'>");
         out.println("<input type='hidden' name='issueId' value='" + ib.getId()       + "'>");
         out.println("<input type='hidden' name='penalty' value='" + penalty          + "'>");
         out.println("<input type='hidden' name='bookId'  value='" + ib.getBookId()   + "'>");
         out.println("<input type='hidden' name='memberId' value='" + ib.getMemberId() + "'>");
-        out.println("<div class='form-group'>");
-        out.println("<label for='penaltyPaid'><i class='fas fa-money-bill-wave'></i> Penalty Paid?</label>");
-        out.println("<select id='penaltyPaid' name='penaltyPaid'>");
-        out.println("<option value='false'>No — will record as unpaid</option>");
-        out.println("<option value='true'>Yes — penalty collected</option>");
-        out.println("</select>");
-        if (penalty == 0) out.println("<small>No penalty applicable for this return.</small>");
-        else out.println("<small>₹10 per overdue day × " + daysOverdue + " days = ₹" + String.format("%.2f", penalty) + "</small>");
-        out.println("</div>");
-        out.println("<div class='form-actions'>");
-        out.println("<button type='submit' class='btn-submit'><i class='fas fa-check'></i> Confirm Return</button>");
-        out.println("<a href='IssuedBookInfoServlet?id=" + ib.getId() + "' class='btn-cancel'><i class='fas fa-times'></i> Cancel</a>");
-        out.println("</div></form></div>");
-
-        out.println("</div>"); // main-content
+        
+        if (isUser) {
+            out.println("<input type='hidden' name='penaltyPaid' value='true'>");
+            if (penalty > 0) {
+                out.println("<div class='form-group p-1 border-l-danger mb-1'>");
+                out.println("<p style='color: #EF4444; margin: 0; font-weight: bold;'><i class='fas fa-exclamation-triangle'></i> Fine Payment Required</p>");
+                out.println("<p class='text-muted mt-1 fs-sm'>You must pay the accumulated fine of ₹" + String.format("%.2f", penalty) + " to return this book. By clicking the button below, you confirm payment.</p>");
+                out.println("</div>");
+            }
+            out.println("<div class='flex gap-1 mt-2'>");
+            out.println("<button type='submit' class='lib-btn lib-btn-primary flex-1'>" + (penalty > 0 ? "Pay Fine & Return Book" : "Confirm Return") + "</button>");
+        } else {
+            out.println("<div class='form-group'>");
+            out.println("<label for='penaltyPaid'>Penalty Paid?</label>");
+            out.println("<select id='penaltyPaid' name='penaltyPaid' class='lib-input bg-muted'>");
+            out.println("<option value='false'>No — will record as unpaid</option>");
+            out.println("<option value='true'>Yes — penalty collected</option>");
+            out.println("</select>");
+            if (penalty == 0) out.println("<p class='text-muted mt-1'><small>No penalty applicable for this return.</small></p>");
+            else out.println("<p class='text-muted mt-1'><small>₹" + com.finlogic.dao.SettingsDAO.getPenaltyRate() + " per overdue day × " + daysOverdue + " days = ₹" + String.format("%.2f", penalty) + "</small></p>");
+            out.println("</div>");
+            out.println("<div class='flex gap-1 mt-2'>");
+            out.println("<button type='submit' class='lib-btn lib-btn-primary flex-1'>Confirm Return</button>");
+        }
+        
+        out.println("<a href='IssuedBookInfoServlet?id=" + ib.getId() + "' class='lib-btn lib-btn-secondary' style='flex: 1;'>Cancel</a>");
+        out.println("</div></form>");
+        out.println("</div></div>");
         out.println("<script src='script.js'></script></body></html>");
     }
 
-    // ── SIDEBAR HELPER ────────────────────────────────────────────────────────
-    private void printSidebar(PrintWriter out, String active) {
-        out.println("<div class='sidebar'>");
-        out.println("<div class='sidebar-header'><h2><i class='fas fa-book-reader'></i> <span>LibSys</span></h2></div>");
-        out.println("<ul class='sidebar-menu'>");
-        out.println("<li><a href='index.html'" + a("dashboard", active) + "><i class='fas fa-home'></i> <span>Dashboard</span></a></li>");
-        out.println("<li><a href='addform.html'" + a("books", active) + "><i class='fas fa-book'></i> <span>Books</span></a></li>");
-        out.println("<li><a href='addmember.html'" + a("members", active) + "><i class='fas fa-users'></i> <span>Members</span></a></li>");
-        out.println("<li><a href='issuebook.html'" + a("issue", active) + "><i class='fas fa-exchange-alt'></i> <span>Issue Book</span></a></li>");
-        out.println("<li><a href='viewmember'" + a("viewmembers", active) + "><i class='fas fa-list'></i> <span>View Members</span></a></li>");
-        out.println("<li><a href='IssuedBook'" + a("issued", active) + "><i class='fas fa-clock'></i> <span>Issued Books</span></a></li>");
-        out.println("<li><a href='ReturnBookServlet'" + a("return", active) + "><i class='fas fa-undo'></i> <span>Return Book</span></a></li>");
-        out.println("<li><a href='view'" + a("viewbooks", active) + "><i class='fas fa-book-open'></i> <span>View Books</span></a></li>");
-        out.println("</ul>");
-        out.println("<div class='sidebar-footer'><a href='login.html' class='logout-btn'><i class='fas fa-sign-out-alt'></i> <span class='logout-text'>Logout</span></a></div>");
-        out.println("</div>");
+    private void printNavbar(PrintWriter out, String active, HttpServletRequest request) {
+        jakarta.servlet.http.HttpSession session = request.getSession(false);
+        boolean isUser = (session != null && "user".equals(session.getAttribute("role")));
+
+        out.println("<nav class='top-navbar'>");
+        out.println("<div class='nav-container container'>");
+        out.println("<a href='" + (isUser ? "user_dashboard.html" : "index.html") + "' class='nav-logo'><i class='fas fa-layer-group'></i> LibraryOS</a>");
+        out.println("<div class='nav-links'>");
+        
+        if (isUser) {
+            out.println(navItem("user_dashboard.html", "fa-home", "Home", "dashboard".equals(active)));
+            out.println(navItem("user_issuebook.html", "fa-book-open", "Issue Book", "issue".equals(active)));
+            out.println(navItem("ReturnBookServlet", "fa-undo", "Return Book", "return".equals(active)));
+        } else {
+            out.println(navItem("index.html",         "fa-home",         "Dashboard",   "dashboard".equals(active)));
+            out.println(navItem("addform.html",        "fa-book",         "Books",       "books".equals(active)));
+            out.println(navItem("addmember.html",      "fa-users",        "Members",     "members".equals(active)));
+            out.println(navItem("issued_books.html",          "fa-exchange-alt", "Issued Books", "issue".equals(active) || "return".equals(active)));
+        }
+        
+        out.println("<a href='LogoutServlet' class='lib-btn lib-btn-secondary nav-logout'><i class='fas fa-sign-out-alt'></i> Logout</a>");
+        out.println("</div></div></nav>");
     }
 
-    private String a(String key, String active) {
-        return key.equals(active) ? " class='active'" : "";
+    private String navItem(String href, String icon, String label, boolean active) {
+        return "<a href='" + href + "' class='nav-link" + (active ? " active" : "") +
+               "'><i class='fas " + icon + "'></i> " + label + "</a>";
     }
 
     private void sendErrorJs(HttpServletResponse response, String msg, String redirectUrl) throws IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        PrintWriter out = response.getWriter();
-        out.println("<script>alert('" + msg.replace("'", "\\'") + "'); window.location='" + redirectUrl + "';</script>");
+        response.sendRedirect(redirectUrl + "?error=failed");
     }
 }

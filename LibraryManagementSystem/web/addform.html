@@ -3,34 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add New Book - Library Management System</title>
+    <title>Add New Book - LibraryOS</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="css/addbook.css">
+    <link rel="stylesheet" href="css/style.css">
 </head>
-<body class="addbook-page">
-    <div class="addbook-container">
-        <div class="addbook-header">
-            <i class="fas fa-book-medical"></i>
-            <h1>Add New Book</h1>
-            <p>Enter book details to add to the library collection</p>
+<body>
+    <div class="blob-container">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <!-- Top Navbar -->
+    <nav class="top-navbar">
+        <div class="nav-container container">
+            <a href="index.html" class="nav-logo">
+                <i class="fas fa-layer-group"></i> LibraryOS
+            </a>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link"><i class="fas fa-home"></i> Dashboard</a>
+                <a href="addform.html" class="nav-link active"><i class="fas fa-book"></i> Books</a>
+                <a href="addmember.html" class="nav-link"><i class="fas fa-users"></i> Members</a>
+                <a href="issued_books.html" class="nav-link"><i class="fas fa-exchange-alt"></i> Issued Books</a>
+            </div>
         </div>
+    </nav>
 
-        <form action="add" method="post" class="addbook-form">
-            <label for="title"><i class="fas fa-book"></i> Book Title</label>
-            <input type="text" id="title" name="title" placeholder="e.g. The Great Gatsby" required>
+    <div class="container max-w-480 mt-4 mb-4">
+        <div class="lib-card p-1">
+            <div class="text-center mb-2">
+                <div class="stat-orb orb-orange m-auto">
+                    <i class="fas fa-book-medical"></i>
+                </div>
+                <h1 class="text-section">Add New Book</h1>
+                <p class="text-muted">Enter book details to add to the library collection</p>
+            </div>
 
-            <label for="auth"><i class="fas fa-user-pen"></i> Author Name</label>
-            <input type="text" id="auth" name="auth" placeholder="e.g. F. Scott Fitzgerald" required>
+            <form action="add" method="post">
+                <div class="form-group">
+                    <label for="title">Book Title</label>
+                    <input type="text" id="title" name="title" class="lib-input" required>
+                </div>
 
-            <label for="cate"><i class="fas fa-folder"></i> Category</label>
-            <input type="text" id="cate" name="cate" placeholder="e.g. Fiction, Science, History" required>
+                <div class="form-group">
+                    <label for="auth">Author Name</label>
+                    <input type="text" id="auth" name="auth" class="lib-input" required>
+                </div>
 
-            <label for="qunt"><i class="fas fa-layer-group"></i> Quantity</label>
-            <input type="number" id="qunt" name="qunt" placeholder="e.g. 5" min="1" required>
+                <div class="form-group">
+                    <label for="cate">Category</label>
+                    <input type="text" id="cate" name="cate" class="lib-input" required>
+                </div>
 
-            <input type="submit" value="  Add Book">
-            <a href="index.html" class="addbook-cancel">  Cancel</a>
-        </form>
+                <div class="form-group">
+                    <label for="qunt">Quantity</label>
+                    <input type="number" id="qunt" name="qunt" class="lib-input" min="1" required>
+                </div>
+
+                <div class="flex gap-1 mt-2">
+                    <button type="submit" class="lib-btn lib-btn-primary flex-1">Add Book</button>
+                    <a href="index.html" class="lib-btn lib-btn-secondary flex-1">Cancel</a>
+                </div>
+            </form>
+        </div>
     </div>
 </body>
 </html>

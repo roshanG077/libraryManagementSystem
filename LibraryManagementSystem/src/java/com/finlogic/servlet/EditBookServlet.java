@@ -21,51 +21,90 @@ public class EditBookServlet extends HttpServlet {
 
         String idParam = request.getParameter("id");
         if (idParam == null || idParam.isBlank()) {
-            response.sendRedirect("view?error=missing_id");
+            response.sendRedirect("books.html?error=missing_id");
             return;
         }
 
         int id;
         try { id = Integer.parseInt(idParam.trim()); }
-        catch (NumberFormatException e) { response.sendRedirect("view?error=invalid_id"); return; }
+        catch (NumberFormatException e) { response.sendRedirect("books.html?error=invalid_id"); return; }
 
         Book b = BookDAO.getBookById(id);
-        if (b == null) { response.sendRedirect("view?error=book_not_found"); return; }
+        if (b == null) { response.sendRedirect("books.html?error=book_not_found"); return; }
 
         out.println("<!DOCTYPE html><html lang='en'><head>");
         out.println("<meta charset='UTF-8'>");
         out.println("<meta name='viewport' content='width=device-width, initial-scale=1.0'>");
-        out.println("<title>Edit Book - Library Management System</title>");
+        out.println("<title>Edit Book - LibraryOS</title>");
         out.println("<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css'>");
-        out.println("<link rel='stylesheet' href='css/addbook.css'>");
-        out.println("</head><body class='addbook-page'>");
+        out.println("<link rel='stylesheet' href='css/style.css'>");
+        out.println("</head><body>");
 
-        out.println("<div class='addbook-container'>");
-        out.println("<div class='addbook-header'>");
-        out.println("<i class='fas fa-edit'></i>");
-        out.println("<h1>Edit Book</h1>");
-        out.println("<p>Update book details for <strong>" + esc(b.getTitle()) + "</strong></p>");
+        out.println("<div class='blob-container'>");
+        out.println("<div class='blob blob-1'></div>");
+        out.println("<div class='blob blob-3'></div>");
         out.println("</div>");
 
-        out.println("<form action='update' method='post' class='addbook-form'>");
+        printNavbar(out, "books");
+
+        out.println("<div class='container max-w-800 mt-4 mb-4'>");
+        out.println("<div class='lib-card'>");
+        out.println("<div class='text-center mb-2'>");
+        out.println("<div class='stat-orb m-auto' style='background: linear-gradient(to bottom right, #60A5FA, #3B82F6);'>");
+        out.println("<i class='fas fa-edit'></i>");
+        out.println("</div>");
+        out.println("<h1 class='text-section'>Edit Book</h1>");
+        out.println("<p class='text-muted'>Update book details for <strong>" + esc(b.getTitle()) + "</strong></p>");
+        out.println("</div>");
+
+        out.println("<form action='update' method='post'>");
         out.println("<input type='hidden' name='id' value='" + b.getId() + "'>");
 
-        out.println("<label for='title'><i class='fas fa-book'></i> Book Title</label>");
-        out.println("<input type='text' id='title' name='title' value='" + esc(b.getTitle()) + "' required>");
+        out.println("<div class='form-group'>");
+        out.println("<label for='title'>Book Title</label>");
+        out.println("<input type='text' id='title' name='title' class='lib-input' value='" + esc(b.getTitle()) + "' required>");
+        out.println("</div>");
 
-        out.println("<label for='auth'><i class='fas fa-user-pen'></i> Author Name</label>");
-        out.println("<input type='text' id='auth' name='auth' value='" + esc(b.getAuthor()) + "' required>");
+        out.println("<div class='form-group'>");
+        out.println("<label for='auth'>Author Name</label>");
+        out.println("<input type='text' id='auth' name='auth' class='lib-input' value='" + esc(b.getAuthor()) + "' required>");
+        out.println("</div>");
 
-        out.println("<label for='cate'><i class='fas fa-folder'></i> Category</label>");
-        out.println("<input type='text' id='cate' name='cate' value='" + esc(b.getCategory()) + "' required>");
+        out.println("<div class='form-group'>");
+        out.println("<label for='cate'>Category</label>");
+        out.println("<input type='text' id='cate' name='cate' class='lib-input' value='" + esc(b.getCategory()) + "' required>");
+        out.println("</div>");
 
-        out.println("<label for='qunt'><i class='fas fa-layer-group'></i> Quantity</label>");
-        out.println("<input type='number' id='qunt' name='qunt' value='" + b.getQuantity() + "' min='0' required>");
+        out.println("<div class='form-group'>");
+        out.println("<label for='qunt'>Quantity</label>");
+        out.println("<input type='number' id='qunt' name='qunt' class='lib-input' value='" + b.getQuantity() + "' min='0' required>");
+        out.println("</div>");
 
-        out.println("<input type='submit' value='💾  Update Book'>");
-        out.println("<a href='view' class='addbook-cancel'>❌  Cancel</a>");
-        out.println("</form></div>");
+        out.println("<div class='flex gap-1 mt-2'>");
+        out.println("<button type='submit' class='lib-btn lib-btn-primary flex-1'>Update Book</button>");
+        out.println("<a href='books.html' class='lib-btn lib-btn-secondary flex-1'>Cancel</a>");
+        out.println("</div>");
+        out.println("</form></div></div>");
+
         out.println("</body></html>");
+    }
+
+    private void printNavbar(PrintWriter out, String active) {
+        out.println("<nav class='top-navbar'>");
+        out.println("<div class='nav-container container'>");
+        out.println("<a href='index.html' class='nav-logo'><i class='fas fa-layer-group'></i> LibraryOS</a>");
+        out.println("<div class='nav-links'>");
+        out.println(navItem("index.html",         "fa-home",         "Dashboard",   "dashboard".equals(active)));
+        out.println(navItem("addform.html",        "fa-book",         "Books",       "books".equals(active)));
+        out.println(navItem("addmember.html",      "fa-users",        "Members",     "members".equals(active)));
+        out.println(navItem("issued_books.html",          "fa-exchange-alt", "Issued Books", "issue".equals(active)));
+        out.println("<a href='LogoutServlet' class='lib-btn lib-btn-secondary nav-logout'><i class='fas fa-sign-out-alt'></i> Logout</a>");
+        out.println("</div></div></nav>");
+    }
+
+    private String navItem(String href, String icon, String label, boolean active) {
+        return "<a href='" + href + "' class='nav-link" + (active ? " active" : "") +
+               "'><i class='fas " + icon + "'></i> " + label + "</a>";
     }
 
     private String esc(String s) {

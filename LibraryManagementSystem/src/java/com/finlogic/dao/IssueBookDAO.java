@@ -46,6 +46,24 @@ public class IssueBookDAO {
         return list;
     }
 
+    // ── GET BY MEMBER ID ──────────────────────────────────────────────────────
+    public static List<IssueBook> getIssuedBooksByMemberId(int memberId) {
+        List<IssueBook> list = new ArrayList<>();
+        String sql = "SELECT * FROM issue_books WHERE member_id=? ORDER BY id DESC";
+        try (Connection c = DBConnection.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+
+            ps.setInt(1, memberId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) list.add(mapFull(rs));
+            }
+
+        } catch (SQLException e) {
+            System.err.println("[IssueBookDAO.getIssuedBooksByMemberId] " + e.getMessage());
+        }
+        return list;
+    }
+
     // ── GET BY ID ─────────────────────────────────────────────────────────────
     public static IssueBook getIssueBookById(int id) {
         String sql = "SELECT * FROM issue_books WHERE id=?";
@@ -75,6 +93,22 @@ public class IssueBookDAO {
             }
         } catch (SQLException e) {
             System.err.println("[IssueBookDAO.getIssuedBook] " + e.getMessage());
+        }
+        return null;
+    }
+
+    // ── GET BY BOOK ONLY (for simplified return flow) ────────────────────────
+    public static IssueBook getIssuedBookByBookId(int bookId) {
+        String sql = "SELECT * FROM issue_books WHERE book_id=? AND returned=false ORDER BY id DESC LIMIT 1";
+        try (Connection c = DBConnection.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+
+            ps.setInt(1, bookId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return mapFull(rs);
+            }
+        } catch (SQLException e) {
+            System.err.println("[IssueBookDAO.getIssuedBookByBookId] " + e.getMessage());
         }
         return null;
     }
@@ -115,11 +149,12 @@ public class IssueBookDAO {
         }
     }
 
-    // ── PENALTY CALCULATION  (₹10/day) ───────────────────────────────────────
+    // ── PENALTY CALCULATION ───────────────────────────────────────
     public static double calculatePenalty(IssueBook ib, Date tillDate) {
         if (ib == null || ib.getReturnDate() == null || tillDate == null) return 0.0;
         long lateDays = (tillDate.getTime() - ib.getReturnDate().getTime()) / (1000L * 60 * 60 * 24);
-        return lateDays > 0 ? lateDays * 10.0 : 0.0;
+        double rate = com.finlogic.dao.SettingsDAO.getPenaltyRate();
+        return lateDays > 0 ? lateDays * rate : 0.0;
     }
 
     public static int calculateDaysOverdue(IssueBook ib, Date currentDate) {

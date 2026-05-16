@@ -3,93 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Issue Book - Library Management System</title>
+    <title>Issue Book - LibraryOS</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-
-    <!-- SIDEBAR -->
-    <div class="sidebar">
-        <div class="sidebar-header">
-            <h2><i class="fas fa-book-reader"></i> <span>LibSys</span></h2>
-        </div>
-        <ul class="sidebar-menu">
-            <li><a href="index.html"><i class="fas fa-home"></i> <span>Dashboard</span></a></li>
-            <li><a href="addform.html"><i class="fas fa-book"></i> <span>Books</span></a></li>
-            <li><a href="addmember.html"><i class="fas fa-users"></i> <span>Members</span></a></li>
-            <li><a href="issuebook.html" class="active"><i class="fas fa-exchange-alt"></i> <span>Issue Book</span></a></li>
-            <li><a href="viewmember"><i class="fas fa-list"></i> <span>View Members</span></a></li>
-            <li><a href="IssuedBook"><i class="fas fa-clock"></i> <span>Issued Books</span></a></li>
-            <li><a href="ReturnBookServlet"><i class="fas fa-undo"></i> <span>Return Book</span></a></li>
-            <li><a href="view"><i class="fas fa-book-open"></i> <span>View Books</span></a></li>
-        </ul>
-        <div class="sidebar-footer">
-            <a href="login.html" class="logout-btn"><i class="fas fa-sign-out-alt"></i> <span class="logout-text">Logout</span></a>
-        </div>
+    <div class="blob-container">
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
     </div>
 
-    <!-- MAIN CONTENT -->
-    <div class="main-content">
-        <header class="top-header">
-            <div class="welcome">
-                <h1>Issue Book</h1>
-                <p>Assign a book to a registered member</p>
+    <!-- Top Navbar -->
+    <nav class="top-navbar">
+        <div class="nav-container container">
+            <a href="index.html" class="nav-logo">
+                <i class="fas fa-layer-group"></i> LibraryOS
+            </a>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link"><i class="fas fa-home"></i> Dashboard</a>
+                <a href="addform.html" class="nav-link"><i class="fas fa-book"></i> Books</a>
+                <a href="addmember.html" class="nav-link"><i class="fas fa-users"></i> Members</a>
+                <a href="issued_books.html" class="nav-link active"><i class="fas fa-exchange-alt"></i> Issued Books</a>
             </div>
-            <div class="user-profile">
-                <button id="theme-toggle" class="theme-toggle"><i class="fas fa-moon"></i> Dark Mode</button>
-                <div class="user-avatar">L</div>
-                <span class="user-name">Admin</span>
-            </div>
-        </header>
+        </div>
+    </nav>
 
-        <!-- FORM CARD -->
-        <div style="max-width:520px; margin: 0 auto;">
-            <div class="dashboard-card">
-                <div class="card-header">
-                    <h3><i class="fas fa-book-open"></i> Issue Book to Member</h3>
+    <div class="container max-w-480 mt-4 mb-4">
+        <div class="lib-card p-1">
+            <div class="text-center mb-2">
+                <div class="stat-orb orb-yellow m-auto">
+                    <i class="fas fa-exchange-alt"></i>
                 </div>
-
-                <form action="IssueBook" method="post">
-                    <div class="form-group">
-                        <label for="bid"><i class="fas fa-barcode"></i> Book ID</label>
-                        <input type="number" id="bid" name="bid" placeholder="Enter Book ID" min="1" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="mid"><i class="fas fa-id-card"></i> Member ID</label>
-                        <input type="number" id="mid" name="mid" placeholder="Enter Member ID" min="1" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="issue"><i class="fas fa-calendar-alt"></i> Issue Date</label>
-                        <input type="date" id="issue" name="issue" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="return"><i class="fas fa-calendar-check"></i> Return Date</label>
-                        <input type="date" id="return" name="return" required>
-                    </div>
-                    <div class="form-actions">
-                        <button type="submit" class="btn-submit"><i class="fas fa-check"></i>Issue Book</button>
-                        <a href="index.html" class="btn-cancel"><i class="fas fa-times"></i>Cancel</a>
-                    </div>
-                </form>
+                <h1 class="text-section">Issue Book</h1>
+                <p class="text-muted">Assign a book to a registered member</p>
             </div>
+
+            <form action="IssueBook" method="post">
+                <div class="form-group">
+                    <label for="bid">Book ID</label>
+                    <input type="number" id="bid" name="bid" class="lib-input" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="mid">Member ID</label>
+                    <input type="number" id="mid" name="mid" class="lib-input" min="1" required>
+                </div>
+                <div class="grid-bento m-0" style="gap: 1rem; grid-template-columns: 1fr 1fr;">
+                    <div class="form-group">
+                        <label for="issue">Issue Date</label>
+                        <input type="date" id="issue" name="issue" class="lib-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="return">Return Date</label>
+                        <input type="date" id="return" name="return" class="lib-input" required>
+                    </div>
+                </div>
+                
+                <div class="flex gap-1 mt-2">
+                    <button type="submit" class="lib-btn lib-btn-primary flex-1">Issue Book</button>
+                    <a href="index.html" class="lib-btn lib-btn-secondary flex-1">Cancel</a>
+                </div>
+            </form>
         </div>
     </div>
 
     <script src="script.js"></script>
-    <script>
-        // Auto-set issue date to today
-        document.getElementById('issue').valueAsDate = new Date();
-
-        // Validate: return date must be after issue date
-        document.querySelector('form').addEventListener('submit', function(e) {
-            const issue = new Date(document.getElementById('issue').value);
-            const ret   = new Date(document.getElementById('return').value);
-            if (ret <= issue) {
-                e.preventDefault();
-                alert('Return date must be after the issue date.');
-            }
-        });
-    </script>
 </body>
 </html>

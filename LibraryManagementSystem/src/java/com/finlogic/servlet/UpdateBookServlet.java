@@ -22,7 +22,7 @@ public class UpdateBookServlet extends HttpServlet {
         String quntParam = request.getParameter("qunt");
 
         if (idParam == null || title == null || auth == null || cate == null || quntParam == null) {
-            response.sendRedirect("view?error=missing_fields");
+            response.sendRedirect("books.html?error=missing_fields");
             return;
         }
 
@@ -31,9 +31,9 @@ public class UpdateBookServlet extends HttpServlet {
             int quantity = Integer.parseInt(quntParam.trim());
             Book book = new Book(id, title.trim(), auth.trim(), cate.trim(), quantity);
             BookDAO.updateBook(book);
-            response.sendRedirect("view?success=updated");
+            response.sendRedirect("books.html?success=updated");
         } catch (NumberFormatException e) {
-            response.sendRedirect("view?error=invalid_input");
+            response.sendRedirect("books.html?error=invalid_input");
         }
     }
 }
